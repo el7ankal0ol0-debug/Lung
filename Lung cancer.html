@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Case Study - Lung Cancer</title>
+    <style>
+        :root {
+            --primary-color: #1a3a5f;
+            --accent-color: #c0392b;
+            --bg-color: #f4f7f6;
+            --pearl-color: #2980b9;
+            --success-color: #27ae60;
+            --prevention-color: #f39c12; /* لون خاص بالوقاية */
+        }
+
+        body, html {
+            margin: 0; padding: 0; height: 100%;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background-color: var(--bg-color);
+            overflow-x: hidden;
+        }
+
+        /* شاشة البداية */
+        #splash-screen {
+            position: fixed; width: 100%; height: 100%;
+            background: white; display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            cursor: pointer; z-index: 100;
+            transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+
+        .main-photo-frame {
+            width: 400px; max-width: 90%;
+            border-radius: 20px; overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            background: #eee;
+        }
+
+        .main-photo-frame img { width: 100%; display: block; min-height: 200px; }
+
+        #splash-screen h1 { font-size: 3rem; color: #333; margin-top: 25px; }
+
+        /* المحتوى الرئيسي */
+        #main-content {
+            display: none; padding: 60px 20px;
+            max-width: 850px; margin: auto; text-align: center;
+        }
+
+        .header-title {
+            font-size: 3rem; color: var(--primary-color);
+            margin-bottom: 40px; border-bottom: 5px solid var(--accent-color);
+            display: inline-block;
+        }
+
+        .interactive-card {
+            background: white; margin: 20px 0; padding: 25px;
+            border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            cursor: pointer; transition: all 0.3s ease;
+            border-right: 8px solid transparent;
+        }
+
+        .interactive-card:hover { transform: scale(1.01); border-right-color: var(--accent-color); }
+
+        .detail-text {
+            display: none; margin-top: 20px; padding: 20px;
+            text-align: left; background: #fafafa;
+            border-radius: 8px; line-height: 1.8; color: #444;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        /* تنسيق الخانات الداخلية الصغيرة */
+        .sub-clickable-item {
+            background: #fff; border: 1px solid #e0e0e0;
+            margin: 10px 0; padding: 15px; border-radius: 10px;
+            cursor: pointer; text-align: left; transition: background 0.2s;
+        }
+
+        .sub-clickable-item:hover { background: #f9f9f9; }
+
+        .sub-content {
+            display: none; padding: 15px;
+            margin-top: 10px; border-top: 1px dashed #ccc;
+        }
+
+        .gallery-img {
+            width: 100%; border-radius: 8px; margin: 0 0 15px 0;
+            border: 1px solid #ddd; box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .pearl-box {
+            background: #eef7ff; border-left: 4px solid var(--pearl-color);
+            padding: 15px; margin-top: 15px; font-style: italic;
+        }
+
+        #ahmed-zaki-img {
+            width: 250px; height: 250px; border-radius: 50%;
+            object-fit: cover; margin: 30px auto;
+            border: 6px solid white; box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            display: none; background: #ddd;
+        }
+
+        .click-right-hint {
+            position: absolute; right: 40px; top: 50%;
+            writing-mode: vertical-rl; font-weight: bold; color: #bbb;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="splash-screen" onclick="openSite()">
+        <div class="main-photo-frame">
+            <img src="00000009.jpg" id="lung-img" alt="Lung Cancer">
+        </div>
+        <h1>Lung Cancer</h1>
+        <div class="click-right-hint">Click on the right to proceed →</div>
+    </div>
+
+    <div id="main-content">
+        <h1 class="header-title">Lung Cancer Study</h1>
+
+        <!-- 1. Definition -->
+        <div class="interactive-card" onclick="toggleSection('definition-content')">
+            <h2 style="margin:0; color: var(--accent-color);">Definition</h2>
+            <div id="definition-content" class="detail-text">
+                Lung cancer is a malignant tumor characterized by uncontrolled cell growth in tissues of the lung.
+            </div>
+        </div>
+
+        <!-- 2. Causes -->
+        <div id="causes-card" class="interactive-card" style="display:none;" onclick="toggleSection('causes-content')">
+            <h2 style="margin:0; color: var(--accent-color);">Common Causes</h2>
+            <div id="causes-content" class="detail-text">
+                <ul>
+                    <li><strong>Smoking:</strong> Primary cause (85% of cases).</li>
+                    <li><strong>Radon Gas:</strong> Radioactive exposure.</li>
+                    <li><strong>Air Pollution:</strong> Industrial chemicals.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 3. Pictures -->
+        <div id="pictures-card" class="interactive-card" style="display:none;" onclick="toggleSection('pictures-container')">
+            <h2 style="margin:0; color: var(--success-color);">Pathology Pictures</h2>
+            <div id="pictures-container" class="detail-text" style="border-left-color: var(--success-color);">
+                
+                <!-- Gross -->
+                <div class="sub-clickable-item" onclick="toggleSubSection(event, 'gross-sub')">
+                    <h3 style="margin:0; color: var(--primary-color);">+ Gross Appearance</h3>
+                    <div id="gross-sub" class="sub-content">
+                        <img src="g.jpg" alt="Gross" class="gallery-img" onerror="this.alt='[Gross Image File: gross.]'">
+                        <p>Large, irregular firm mass, usually grayish-white, often involving the hilum and invading the lung parenchyma.</p>
+                    </div>
+                </div>
+
+                <!-- Microscopic -->
+                <div class="sub-clickable-item" onclick="toggleSubSection(event, 'micro-sub')">
+                    <h3 style="margin:0; color: var(--primary-color);">+ Microscopic</h3>
+                    <div id="micro-sub" class="sub-content">
+                        <img src="m.jpg" alt="Microscopic" class="gallery-img" onerror="this.alt='[Microscopic Image File: micro.]'">
+                        <p>Clusters of malignant epithelial cells. In Squamous types, look for <strong>Keratin Pearls</strong> and <strong>Intercellular Bridges</strong>.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Prevention (القسم الجديد) -->
+        <div id="prevention-card" class="interactive-card" style="display:none;" onclick="toggleSection('prevention-content')">
+            <h2 style="margin:0; color: var(--prevention-color);">Prevention</h2>
+            <div id="prevention-content" class="detail-text" style="border-left-color: var(--prevention-color);">
+                <ul>
+                    <li><strong>Quit Smoking:</strong> The most effective way to reduce risk.</li>
+                    <li><strong>Avoid Secondhand Smoke:</strong> Stay away from smoke-filled environments.</li>
+                    <li><strong>Test for Radon:</strong> Ensure your home/workplace is safe from radioactive gases.</li>
+                    <li><strong>Healthy Diet:</strong> High intake of fruits and vegetables may offer protection.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 5. Famous Case -->
+        <div id="famous-case-btn" class="interactive-card" style="display:none;" onclick="toggleSection('celeb-identity')">
+            <h2 style="margin:0; color: var(--accent-color);">Famous Case</h2>
+            <div id="celeb-identity" class="detail-text" style="text-align:center; font-size:1.6rem; font-weight:bold;">
+                <span onclick="revealZakiDetails(event)" style="color: var(--primary-color); text-decoration: underline;">
+                    Ahmed Zaki
+                </span>
+            </div>
+        </div>
+
+        <!-- 6. Case Details -->
+        <div id="zaki-full-details" style="display:none;">
+            <img id="ahmed-zaki-img" src="1.jpg" alt="Ahmed Zaki">
+            <div class="interactive-card" style="text-align:left; cursor:default;">
+                <h2 style="color:var(--primary-color);">Medical Case File</h2>
+                <p><strong>Symptoms:</strong> Dyspnea, persistent cough, and weight loss.</p>
+                <p><strong>Diagnosis:</strong> Advanced Bronchogenic Carcinoma.</p>
+                <div class="pearl-box">
+                    <strong>Pathological Pearl:</strong> 
+                    Squamous Cell Carcinoma is often central and characterized by Keratin Pearls.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openSite() {
+            document.getElementById('splash-screen').style.transform = 'translateX(-100%)';
+            setTimeout(() => {
+                document.getElementById('splash-screen').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+            }, 800);
+        }
+
+        function toggleSection(id) {
+            const el = document.getElementById(id);
+            const isVisible = (el.style.display === 'block');
+            el.style.display = isVisible ? 'none' : 'block';
+            
+            // تسلسل ظهور الخانات
+            if(id === 'definition-content') document.getElementById('causes-card').style.display = 'block';
+            else if(id === 'causes-content') document.getElementById('pictures-card').style.display = 'block';
+            else if(id === 'pictures-container') document.getElementById('prevention-card').style.display = 'block';
+            else if(id === 'prevention-content') document.getElementById('famous-case-btn').style.display = 'block';
+        }
+
+        function toggleSubSection(event, id) {
+            event.stopPropagation();
+            const el = document.getElementById(id);
+            el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+        }
+
+        function revealZakiDetails(event) {
+            event.stopPropagation();
+            document.getElementById('zaki-full-details').style.display = 'block';
+            document.getElementById('ahmed-zaki-img').style.display = 'block';
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
