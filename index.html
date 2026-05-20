@@ -12,6 +12,7 @@
             --pearl-color: #2980b9;
             --success-color: #27ae60;
             --prevention-color: #f39c12; /* لون خاص بالوقاية */
+            --summary-color: #2980b9; /* لون أزرق مميز لخانة الملخص */
             --game-color: #8e44ad; /* لون بنفسجي مميز لخانة الألعاب */
         }
 
@@ -63,7 +64,8 @@
 
         .interactive-card:hover { transform: scale(1.01); border-right-color: var(--accent-color); }
         
-        /* تأثير خاص لحافة خانة الألعاب عند التمرير */
+        /* تأثير خاص لحافة خانة الملخص والالعاب عند التمرير */
+        #summary-card:hover { border-right-color: var(--summary-color); }
         #game-card:hover { border-right-color: var(--game-color); }
 
         .detail-text {
@@ -108,6 +110,15 @@
             position: absolute; right: 40px; top: 50%;
             writing-mode: vertical-rl; font-weight: bold; color: #bbb;
         }
+
+        /* تنسيق مشغل الفيديو */
+        .video-container {
+            width: 100%; max-width: 700px; margin: 15px auto 0 auto;
+            border-radius: 12px; overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            background: #000;
+        }
+        .video-container video { width: 100%; display: block; }
     </style>
 </head>
 <body>
@@ -205,7 +216,20 @@
             </div>
         </div>
 
-        <!-- 7. Game Section (الخانة الجديدة) -->
+        <!-- 7. Summary Video Section (الخانة الجديدة المضافة) -->
+        <div id="summary-card" class="interactive-card" style="display:none;" onclick="toggleSection('summary-content')">
+            <h2 style="margin:0; color: var(--summary-color);">Summary Video 🎬</h2>
+            <div id="summary-content" class="detail-text" style="border-left-color: var(--summary-color); text-align: center;">
+                <div class="video-container">
+                    <video id="summary-video" controls>
+                        <source src="loo.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+            </div>
+        </div>
+
+        <!-- 8. Game Section -->
         <div id="game-card" class="interactive-card" style="display:none;" onclick="goToGame()">
             <h2 style="margin:0; color: var(--game-color);">Game 🎮</h2>
         </div>
@@ -225,11 +249,17 @@
             const isVisible = (el.style.display === 'block');
             el.style.display = isVisible ? 'none' : 'block';
             
+            // التحكم في إيقاف الفيديو مؤقتاً إذا تم إغلاق خانة الملخص
+            if(id === 'summary-content' && isVisible) {
+                document.getElementById('summary-video').pause();
+            }
+            
             // تسلسل ظهور الخانات
             if(id === 'definition-content') document.getElementById('causes-card').style.display = 'block';
             else if(id === 'causes-content') document.getElementById('pictures-card').style.display = 'block';
             else if(id === 'pictures-container') document.getElementById('prevention-card').style.display = 'block';
             else if(id === 'prevention-content') document.getElementById('famous-case-btn').style.display = 'block';
+            else if(id === 'summary-content') document.getElementById('game-card').style.display = 'block'; // تظهر خانة اللعبة بعد فتح الملخص
         }
 
         function toggleSubSection(event, id) {
@@ -242,8 +272,9 @@
             event.stopPropagation();
             document.getElementById('zaki-full-details').style.display = 'block';
             document.getElementById('ahmed-zaki-img').style.display = 'block';
-            // إظهار خانة اللعبة بعد استعراض تفاصيل القصة الشهيرة كاملة
-            document.getElementById('game-card').style.display = 'block';
+            
+            // إظهار خانة الملخص أولاً بعد استعراض تفاصيل القصة الشهيرة كاملة
+            document.getElementById('summary-card').style.display = 'block';
             
             setTimeout(() => {
                 window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
