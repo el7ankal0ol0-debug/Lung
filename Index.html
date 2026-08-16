@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سؤال 💌</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background: linear-gradient(135deg,#ffdde1,#ee9ca7);
+    font-family:'Tahoma','Segoe UI',sans-serif;
+    overflow:hidden;
+    position:relative;
+    transition: background 1.2s ease; /* تأثير انتقال ناعم لتغير الخلفية */
+  }
+
+  /* المظروف */
+  #envelope-wrap {
+    cursor:pointer;
+    text-align:center;
+    user-select:none;
+    transition: transform 0.3s;
+    z-index:5;
+  }
+  #envelope-wrap:hover { transform: scale(1.05); }
+
+  .envelope {
+    width:220px;
+    height:150px;
+    background:#fff;
+    border:2px solid #e28fa3;
+    border-radius:10px;
+    position:relative;
+    box-shadow:0 10px 25px rgba(0,0,0,0.2);
+    overflow:visible;
+  }
+  .envelope::before {
+    content:"";
+    position:absolute;
+    top:0; left:0;
+    width:0; height:0;
+    border-left:110px solid transparent;
+    border-right:110px solid transparent;
+    border-top:80px solid #f7b6c2;
+    z-index:2;
+    transition: transform 0.5s ease;
+    transform-origin: top;
+  }
+  .envelope::after {
+    content:"";
+    position:absolute;
+    bottom:0; left:0;
+    width:0; height:0;
+    border-left:110px solid transparent;
+    border-right:110px solid transparent;
+    border-bottom:75px solid #ffc9d4;
+    z-index:1;
+  }
+  .envelope.open::before {
+    transform: rotateX(180deg);
+  }
+  .heart-seal {
+    position:absolute;
+    top:55px; left:50%;
+    transform:translateX(-50%);
+    font-size:28px;
+    z-index:3;
+    animation: pulse 1.2s infinite;
+  }
+  @keyframes pulse {
+    0%,100% { transform:translateX(-50%) scale(1); }
+    50% { transform:translateX(-50%) scale(1.15); }
+  }
+  #hint {
+    margin-top:20px;
+    color:#7a2e3d;
+    font-size:16px;
+    font-weight:bold;
+  }
+
+  /* الورقة */
+  #letter {
+    display:none;
+    background:#fffdf7;
+    width:90%;
+    max-width:420px;
+    padding:35px 25px;
+    border-radius:14px;
+    box-shadow:0 15px 40px rgba(0,0,0,0.25);
+    text-align:center;
+    position:relative;
+    z-index:6;
+    animation: popUp 0.5s ease;
+  }
+  @keyframes popUp {
+    from { transform: scale(0.5) translateY(60px); opacity:0; }
+    to { transform: scale(1) translateY(0); opacity:1; }
+  }
+  #letter h1 {
+    color:#c2185b;
+    font-size:26px;
+    margin-bottom:25px;
+  }
+  .btns {
+    display:flex;
+    gap:15px;
+    justify-content:center;
+    margin-bottom:15px;
+  }
+  .btns button {
+    padding:12px 30px;
+    font-size:18px;
+    border:none;
+    border-radius:30px;
+    cursor:pointer;
+    font-weight:bold;
+    transition: transform 0.2s;
+  }
+  .btns button:active { transform: scale(0.92); }
+  #yesBtn {
+    background:#e91e63;
+    color:#fff;
+    box-shadow:0 5px 15px rgba(233,30,99,0.4);
+  }
+  #noBtn {
+    background:#f0f0f0;
+    color:#555;
+  }
+  #oops {
+    display:none;
+    margin-top:10px;
+    color:#555;
+    font-size:16px;
+  }
+  #oops .emoji { font-size:40px; display:block; margin-bottom:5px; line-height:1.3; }
+
+  /* رسالة الحب النهائية */
+  #finalMsg {
+    display:none;
+    position:fixed;
+    inset:0;
+    align-items:center;
+    justify-content:center;
+    z-index:20;
+    text-align:center;
+  }
+  #finalMsg h1 {
+    color:#c2185b;
+    font-size:32px;
+    text-shadow:0 3px 10px rgba(255,255,255,0.8);
+    background:rgba(255,255,255,0.85);
+    padding:25px 35px;
+    border-radius:20px;
+    animation: popUp 0.6s ease;
+  }
+
+  /* رسالة الحزن النهائية الثابتة */
+  #finalSadMsg {
+    display:none;
+    position:fixed;
+    inset:0;
+    align-items:center;
+    justify-content:center;
+    z-index:20;
+    text-align:center;
+  }
+  #finalSadMsg h1 {
+    color:#333;
+    font-size:32px;
+    text-shadow:0 3px 10px rgba(255,255,255,0.8);
+    background:rgba(255,255,255,0.9);
+    padding:25px 35px;
+    border-radius:20px;
+    animation: popUp 0.6s ease;
+  }
+
+  .heart-fall {
+    position:fixed;
+    top:-40px;
+    font-size:24px;
+    pointer-events:none;
+    z-index:15;
+    animation-name: fall;
+    animation-timing-function: linear;
+  }
+  @keyframes fall {
+    to { transform: translateY(110vh) rotate(360deg); opacity:0.2; }
+  }
+</style>
+</head>
+<body>
+
+  <div id="envelope-wrap" onclick="openEnvelope()">
+    <div class="envelope" id="envelope">
+      <div class="heart-seal">❤️</div>
+    </div>
+    <div id="hint">اضغط على المظروف 💌</div>
+  </div>
+
+  <div id="letter">
+    <h1 id="question">انت بتحبني؟ 🥹</h1>
+    <div class="btns">
+      <button id="yesBtn" onclick="sayYes()">أيوة ❤️</button>
+      <button id="noBtn" onclick="sayNo()">لا</button>
+    </div>
+    <div id="oops">
+      <span class="emoji" id="oopsEmoji">😢</span>
+      <span id="oopsText">شكلك ضغطت بالغلط...</span>
+    </div>
+  </div>
+
+  <div id="finalMsg">
+    <h1>وأنا كمان بحبك ❤️😍</h1>
+  </div>
+
+  <div id="finalSadMsg">
+    <h1>قلبي اتكسر خالص 💔😭</h1>
+  </div>
+
+<script>
+  function openEnvelope(){
+    const env = document.getElementById('envelope');
+    env.classList.add('open');
+    setTimeout(()=>{
+      document.getElementById('envelope-wrap').style.display='none';
+      document.getElementById('letter').style.display='block';
+    }, 450);
+  }
+
+  const noMessages = [
+    "شكلك ضغطت بالغلط... 😢",
+    "متأكد؟ 🤨",
+    "طب فكر تاني 🤔",
+    "متتكسفش قول 🙈",
+    "برضو لأ؟! 😳",
+    "قلبي مش هيستحمل كده 💔",
+    "جرب تاني يمكن غلطة إيد 😏",
+    "بصراحة مش هصدق 🙄",
+    "طب وبعدين هتقول إيه؟ 😅",
+    "آخر فرصة كده هه 😌"
+  ];
+  let noCount = 0;
+  let oopsTimer = null;
+
+  function sadRain(){
+    const sadEmojis = ['😭','💔','😢'];
+    for(let i=0; i<40; i++){
+      setTimeout(()=>{
+        const h = document.createElement('div');
+        h.className='heart-fall';
+        h.textContent = sadEmojis[Math.floor(Math.random()*sadEmojis.length)];
+        h.style.left = Math.random()*100 + 'vw';
+        const fallDuration = 2 + Math.random()*2;
+        h.style.animationDuration = fallDuration + 's';
+        h.style.fontSize = (18 + Math.random()*20) + 'px';
+        document.body.appendChild(h);
+        setTimeout(()=>h.remove(), fallDuration*1000 + 200);
+      }, i*50);
+    }
+    setInterval(()=>{
+      const h = document.createElement('div');
+      h.className='heart-fall';
+      h.textContent = sadEmojis[Math.floor(Math.random()*sadEmojis.length)];
+      h.style.left = Math.random()*100 + 'vw';
+      const fallDuration = 3 + Math.random()*2;
+      h.style.animationDuration = fallDuration + 's';
+      h.style.fontSize = (18 + Math.random()*20) + 'px';
+      document.body.appendChild(h);
+      setTimeout(()=>h.remove(), fallDuration*1000 + 200);
+    }, 300);
+  }
+
+  function sayNo(){
+    noCount++;
+    const emojiEl = document.getElementById('oopsEmoji');
+    const textEl = document.getElementById('oopsText');
+
+    if(noCount >= 10){
+      document.body.style.background = '#111'; // تحويل الخلفية إلى اللون الأسود
+      document.getElementById('letter').style.display = 'none';
+      document.getElementById('finalSadMsg').style.display = 'flex';
+      sadRain();
+      return;
+    }
+
+    const msg = noMessages[Math.min(noCount-1, noMessages.length-1)];
+    emojiEl.textContent = '😢';
+    textEl.textContent = msg;
+
+    document.getElementById('oops').style.display='block';
+
+    if(oopsTimer) clearTimeout(oopsTimer);
+
+    oopsTimer = setTimeout(()=>{
+      document.getElementById('oops').style.display='none';
+    }, 2000);
+  }
+
+  function sayYes(){
+    document.getElementById('letter').style.display='none';
+    fillHearts();
+    setTimeout(()=>{
+      document.getElementById('finalMsg').style.display='flex';
+    }, 900);
+  }
+
+  function fillHearts(){
+    const hearts = ['❤️','💖','💕','💗','💓','😍'];
+    const count = 80;
+    for(let i=0; i<count; i++){
+      setTimeout(()=>{
+        const h = document.createElement('div');
+        h.className='heart-fall';
+        h.textContent = hearts[Math.floor(Math.random()*hearts.length)];
+        h.style.left = Math.random()*100 + 'vw';
+        const duration = 2 + Math.random()*2.5;
+        h.style.animationDuration = duration + 's';
+        h.style.fontSize = (16 + Math.random()*22) + 'px';
+        document.body.appendChild(h);
+        setTimeout(()=>h.remove(), duration*1000 + 200);
+      }, i*45);
+    }
+    setInterval(()=>{
+      const h = document.createElement('div');
+      h.className='heart-fall';
+      const hearts2 = ['❤️','💖','💕'];
+      h.textContent = hearts2[Math.floor(Math.random()*hearts2.length)];
+      h.style.left = Math.random()*100 + 'vw';
+      const duration = 3 + Math.random()*2;
+      h.style.animationDuration = duration + 's';
+      h.style.fontSize = (16 + Math.random()*20) + 'px';
+      document.body.appendChild(h);
+      setTimeout(()=>h.remove(), duration*1000 + 200);
+    }, 300);
+  }
+</script>
+
+</body>
+</html>
