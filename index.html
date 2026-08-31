@@ -684,7 +684,7 @@
       <input type="text" id="txIdInput" placeholder="أدخل رقم عملية التحويل هنا...">
     </div>
 
-    <button class="submit-btn" onclick="confirmOrder()">تأكيد الطلب</button>
+    <button class="submit-btn" id="confirmOrderBtn" onclick="confirmOrder()">تأكيد الطلب</button>
   </div>
 </div>
 
@@ -715,7 +715,25 @@
   © Lavia Fashion — جميع الحقوق محفوظة
 </footer>
 
-<script>
+<!-- Firebase Modular Script -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+  import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCd-LETJDDbiEcfFIZC-tS2Z71sxcAkCjM",
+    authDomain: "fashion-a6618.firebaseapp.com",
+    projectId: "fashion-a6618",
+    storageBucket: "fashion-a6618.firebasestorage.app",
+    messagingSenderId: "359758522495",
+    appId: "1:359758522495:web:9f72cae8486385acfa374a",
+    measurementId: "G-5XE9QFZYQV",
+    databaseURL: "https://fashion-a6618-default-rtdb.firebaseio.com"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
   const products = [
     {
       id: 1,
@@ -728,20 +746,21 @@
 
   let cart = {};
   let selectedPaymentMethod = "cod";
+  let orderAddress = null;
 
-  function toggleSearch(){
+  window.toggleSearch = () => {
     const sb = document.getElementById("searchBar");
     sb.classList.toggle("show");
     if(sb.classList.contains("show")){
       document.getElementById("searchInput").focus();
     }
-  }
+  };
 
-  function filterProducts(){
+  window.filterProducts = () => {
     const q = document.getElementById("searchInput").value.trim().toLowerCase();
     const filtered = products.filter(p => p.name.toLowerCase().includes(q));
     renderProducts(filtered);
-  }
+  };
 
   function renderProducts(list){
     const container = document.getElementById("productList");
@@ -765,23 +784,23 @@
     `).join("");
   }
 
-  function addToCart(id){
+  window.addToCart = (id) => {
     cart[id] = (cart[id] || 0) + 1;
     updateCartUI();
-    openCart();
-  }
+    window.openCart();
+  };
 
-  function changeQty(id, delta){
+  window.changeQty = (id, delta) => {
     if(!cart[id]) return;
     cart[id] += delta;
     if(cart[id] <= 0) delete cart[id];
     updateCartUI();
-  }
+  };
 
-  function removeFromCart(id){
+  window.removeFromCart = (id) => {
     delete cart[id];
     updateCartUI();
-  }
+  };
 
   function cartCount(){
     return Object.values(cart).reduce((a,b)=>a+b, 0);
@@ -831,29 +850,27 @@
     }).join("");
   }
 
-  function openCart(){
+  window.openCart = () => {
     document.getElementById("cartOverlay").classList.add("show");
-  }
+  };
 
-  function closeModal(id){
+  window.closeModal = (id) => {
     document.getElementById(id).classList.remove("show");
-  }
+  };
 
-  function closeAll(){
-    ["cartOverlay","addressOverlay","paymentOverlay","successOverlay","myOrdersOverlay"].forEach(id=>closeModal(id));
+  window.closeAll = () => {
+    ["cartOverlay","addressOverlay","paymentOverlay","successOverlay","myOrdersOverlay"].forEach(id=>window.closeModal(id));
     cart = {};
     updateCartUI();
-  }
+  };
 
-  function goToAddress(){
+  window.goToAddress = () => {
     if(cartCount() === 0) return;
-    closeModal("cartOverlay");
+    window.closeModal("cartOverlay");
     document.getElementById("addressOverlay").classList.add("show");
-  }
+  };
 
-  let orderAddress = null;
-
-  function submitAddress(e){
+  window.submitAddress = (e) => {
     e.preventDefault();
     orderAddress = {
       name: document.getElementById("fName").value,
@@ -862,14 +879,14 @@
       address: document.getElementById("fAddress").value,
       notes: document.getElementById("fNotes").value
     };
-    closeModal("addressOverlay");
-    selectPaymentMethod('cod'); // Default selection
+    window.closeModal("addressOverlay");
+    window.selectPaymentMethod('cod');
     document.getElementById("txIdInput").value = "";
     document.getElementById("payTotalAmount").textContent = cartTotal().toLocaleString('ar-EG') + " ج.م";
     document.getElementById("paymentOverlay").classList.add("show");
-  }
+  };
 
-  function selectPaymentMethod(method){
+  window.selectPaymentMethod = (method) => {
     selectedPaymentMethod = method;
     const btnCod = document.getElementById("optCod");
     const btnWallet = document.getElementById("optWallet");
@@ -884,16 +901,16 @@
       btnCod.classList.remove("active");
       walletDetails.style.display = "block";
     }
-  }
+  };
 
-  function copyVfNumber(){
+  window.copyVfNumber = () => {
     const num = document.getElementById("vfNum").textContent;
     navigator.clipboard.writeText(num).then(() => {
       alert("تم نسخ الرقم: " + num);
     }).catch(() => {
       alert("الرقم: " + num);
     });
-  }
+  };
 
   function getStoredOrders(){
     try {
@@ -909,7 +926,7 @@
     localStorage.setItem('lavia_my_orders', JSON.stringify(orders));
   }
 
-  function openMyOrders(){
+  window.openMyOrders = () => {
     const container = document.getElementById("myOrdersList");
     const orders = getStoredOrders();
 
@@ -936,7 +953,7 @@
     }
 
     document.getElementById("myOrdersOverlay").classList.add("show");
-  }
+  };
 
   function buildOrderText(orderId, payMethodText){
     let itemsStr = "";
@@ -964,7 +981,7 @@ ${itemsStr}
 - ملاحظات: ${orderAddress?.notes || 'لا يوجد'}`;
   }
 
-  function confirmOrder(){
+  window.confirmOrder = () => {
     let txId = "";
     let payMethodText = "الدفع عند الاستلام";
 
@@ -984,31 +1001,48 @@ ${itemsStr}
       return { name: p ? p.name : '', price: p ? p.price : 0, qty };
     });
 
+    const currentDate = new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
     const newOrderObj = {
       id: orderId,
-      date: new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+      date: currentDate,
       items: itemsArray,
       total: cartTotal(),
       paymentMethod: payMethodText,
-      status: 'قيد المتابعة'
+      status: 'قيد المتابعة',
+      customer: orderAddress || {}
     };
 
-    saveOrderToStorage(newOrderObj);
+    const confirmBtn = document.getElementById("confirmOrderBtn");
+    confirmBtn.disabled = true;
+    confirmBtn.textContent = "جاري الإرسال...";
 
-    closeModal("paymentOverlay");
-    document.getElementById("orderIdTxt").textContent = orderId;
+    // الحفظ في Firebase Realtime Database
+    set(ref(db, 'orders/' + orderId), newOrderObj).then(() => {
+      confirmBtn.disabled = false;
+      confirmBtn.textContent = "تأكيد الطلب";
 
-    let orderText = "";
-    try{
-      orderText = buildOrderText(orderId, payMethodText);
-    }catch(err){
-      orderText = "تفاصيل الطلب: رقم الطلب " + orderId;
-    }
-    document.getElementById("orderTextArea").value = orderText;
-    document.getElementById("successOverlay").classList.add("show");
-  }
+      saveOrderToStorage(newOrderObj);
 
-  function copyOrderText(){
+      window.closeModal("paymentOverlay");
+      document.getElementById("orderIdTxt").textContent = orderId;
+
+      let orderText = "";
+      try{
+        orderText = buildOrderText(orderId, payMethodText);
+      }catch(err){
+        orderText = "تفاصيل الطلب: رقم الطلب " + orderId;
+      }
+      document.getElementById("orderTextArea").value = orderText;
+      document.getElementById("successOverlay").classList.add("show");
+    }).catch((err) => {
+      confirmBtn.disabled = false;
+      confirmBtn.textContent = "تأكيد الطلب";
+      alert("حدث خطأ أثناء الاتصال بقاعدة البيانات: " + err.message);
+    });
+  };
+
+  window.copyOrderText = () => {
     const ta = document.getElementById("orderTextArea");
     ta.select();
     ta.setSelectionRange(0, 999999);
@@ -1020,71 +1054,11 @@ ${itemsStr}
     }).catch(()=>{
       document.execCommand("copy");
     });
-  }
+  };
 
   // Init
   renderProducts(products);
   updateCartUI();
-</script>
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
-  import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyCd-LETJDDbiEcfFIZC-tS2Z71sxcAkCjM",
-    authDomain: "fashion-a6618.firebaseapp.com",
-    projectId: "fashion-a6618",
-    storageBucket: "fashion-a6618.firebasestorage.app",
-    messagingSenderId: "359758522495",
-    appId: "1:359758522495:web:9f72cae8486385acfa374a",
-    measurementId: "G-5XE9QFZYQV",
-    databaseURL: "https://fashion-a6618-default-rtdb.firebaseio.com" // رابط قاعدة بيانات Realtime
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-
-  // إتاحة الدالة عالمياً لاستدعائها عند الضغط على زر تأكيد الطلب
-  window.confirmOrder = function(){
-    let txId = "";
-    let payMethodText = "الدفع عند الاستلام";
-
-    if(selectedPaymentMethod === 'wallet'){
-      txId = document.getElementById("txIdInput").value.trim();
-      if(!txId){
-        alert("يرجى إدخال رقم عملية التحويل لتأكيد الطلب.");
-        return;
-      }
-      payMethodText = `محفظة إلكترونية / InstaPay (رقم العملية: ${txId})`;
-    }
-
-    const orderId = "LV-" + Math.floor(100000 + Math.random() * 900000);
-    
-    const itemsArray = Object.entries(cart).map(([id, qty]) => {
-      const p = products.find(x => x.id == id);
-      return { name: p ? p.name : '', price: p ? p.price : 0, qty };
-    });
-
-    const newOrderObj = {
-      id: orderId,
-      date: new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
-      items: itemsArray,
-      total: cartTotal(),
-      paymentMethod: payMethodText,
-      status: 'تحت المعالجة',
-      customer: orderAddress
-    };
-
-    // إرسال البيانات فوراً إلى Firebase
-    set(ref(db, 'orders/' + orderId), newOrderObj).then(() => {
-      closeModal("paymentOverlay");
-      document.getElementById("orderIdTxt").textContent = orderId;
-      document.getElementById("orderTextArea").value = buildOrderText(orderId, payMethodText);
-      document.getElementById("successOverlay").classList.add("show");
-    }).catch(error => {
-      alert("حدث خطأ أثناء إرسال الطلب: " + error.message);
-    });
-  };
 </script>
 
 </body>
